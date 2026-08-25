@@ -1,0 +1,46 @@
+# ==============================
+# LangChain / Agents
+# ==============================
+
+langchain
+langchain-openai
+langchain-mistralai
+langchain-tavily
+langgraph
+
+# ==============================
+# LLM Providers
+# ==============================
+
+openai
+mistralai
+
+# ==============================
+# Search & Web Scraping
+# ==============================
+
+tavily-python
+beautifulsoup4
+requests
+lxml
+
+# ==============================
+# LCEL / Data Processing
+# ==============================
+
+numpy
+
+# ==============================
+# Backend API
+# ==============================
+
+fastapi
+uvicorn
+
+# ==============================
+# Validation & Configuration
+# ==============================
+
+pydantic
+python-dotenv
+

@@ -52,9 +52,11 @@ ResearchPilot/
 
 ## Installation
 
+```bash 
 git clone https://github.com/your-username/ResearchPilot.git
 cd ResearchPilot
 pip install -r requirements.txt
+```
 
 ## Environment Variables
 

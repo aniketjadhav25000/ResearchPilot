@@ -53,7 +53,7 @@ ResearchPilot/
 ## Installation
 
 ```bash 
-git clone https://github.com/your-username/ResearchPilot.git
+git clone https://github.com/aniketjadhav25000/ResearchPilot.git
 cd ResearchPilot
 pip install -r requirements.txt
 ```
@@ -68,9 +68,9 @@ TAVILY_API_KEY=your_api_key
 Use the exact environment variable names required by your implementation.
 
 ## Run Locally
-
+```bash
 streamlit run app.py
-
+```
 Open the local Streamlit URL and enter a research topic to start the pipeline.
 
 ## Deployment

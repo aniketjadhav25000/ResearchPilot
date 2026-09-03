@@ -78,6 +78,4 @@ Create a `.env` file:
 5. Critic Chain reviews the report.
 6. Results are displayed in the Streamlit interface.
 
-## License
 
-MIT License

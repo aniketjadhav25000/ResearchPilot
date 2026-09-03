@@ -35,7 +35,6 @@ ResearchPilot is a **Generative AI-powered multi-agent research system** that se
 - Python
 - Generative AI / LLMs
 - LangChain
-- LangGraph
 - `create_agent`
 - Streamlit
 - Tavily Web Search
@@ -78,20 +77,6 @@ Create a `.env` file:
 4. Writer Chain generates the research report.
 5. Critic Chain reviews the report.
 6. Results are displayed in the Streamlit interface.
-
-## Deployment
-
-For Render:
-
-**Build Command**
-
-    pip install -r requirements.txt
-
-**Start Command**
-
-    streamlit run app.py --server.address 0.0.0.0 --server.port $PORT
-
-Add the required API keys as environment variables.
 
 ## License
 

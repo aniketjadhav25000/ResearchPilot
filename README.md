@@ -4,7 +4,7 @@ ResearchPilot is a **Generative AI-powered multi-agent research system** that se
 
 ## Live Demo
 
-🚀 https://research-pilott.streamlit.app/
+https://research-pilott.streamlit.app/
 
 ## Features
 
@@ -38,6 +38,7 @@ ResearchPilot is a **Generative AI-powered multi-agent research system** that se
 - `create_agent`
 - Streamlit
 - Tavily Web Search
+- Beautiful Soup
 - Web Scraping
 - Prompt Engineering
 - AI Agent Orchestration
@@ -78,4 +79,6 @@ Create a `.env` file:
 5. Critic Chain reviews the report.
 6. Results are displayed in the Streamlit interface.
 
+## License
 
+MIT License

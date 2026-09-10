@@ -1,74 +1,110 @@
 # ResearchPilot
 
-ResearchPilot is a Generative AI-powered multi-agent research system that automates the process of web research, source extraction, report generation, and critical evaluation.
+ResearchPilot is a Generative AI research assistant that automates the process of searching the web, extracting useful information, generating a structured research report, and critically reviewing the final output.
 
-The application takes a research topic, searches the web for relevant information using Tavily, extracts detailed content from a selected source, generates a structured research report using Mistral AI, and evaluates the generated report using a dedicated critic chain.
-
-## Live Demo
-
-Try ResearchPilot here:
+## Live Project
 
 https://research-pilott.streamlit.app/
 
-## GitHub Repository
+## Features
 
-https://github.com/aniketjadhav25000/ResearchPilot
+- Web search using Tavily
+- URL content extraction and cleaning
+- AI-generated research reports
+- Automated report critique and scoring
+- Structured research workflow
+- Streamlit-based interface
+- Mistral AI for report generation and evaluation
 
----
+## Agent Architecture
 
-## Overview
+Research Topic  
+↓  
+Search Agent  
+↓  
+Reader Agent  
+↓  
+Writer Chain  
+↓  
+Critic Chain  
+↓  
+Final Research Report
 
-Researching a topic manually often requires searching through multiple websites, reading long articles, extracting useful information, organizing findings, and reviewing the final content.
+### Agents
 
-ResearchPilot simplifies this workflow by combining web search, web scraping, Large Language Models, prompt engineering, and a multi-stage processing pipeline into a single application.
+**Search Agent**
+- Searches the web for relevant and recent information.
+- Returns useful sources and URLs.
 
-The system currently follows this workflow:
+**Reader Agent**
+- Scrapes and cleans content from selected web pages.
+- Removes unnecessary HTML elements and extracts readable content.
 
-Research Topic
-       ↓
-Tavily Web Search
-       ↓
-Relevant Search Results
-       ↓
-Source Extraction
-       ↓
-Web Page Scraping
-       ↓
-Research Writer
-       ↓
-Research Report
-       ↓
-Research Critic
-       ↓
-Final Research Output
+**Writer Chain**
+- Combines search results and extracted content.
+- Generates a structured research report with:
+  - Introduction
+  - Key Findings
+  - Conclusion
+  - Sources
 
+**Critic Chain**
+- Reviews the generated report.
+- Provides a score, strengths, areas for improvement, and an overall verdict.
 
-## Key Features
+## Tech Stack
 
-- AI-powered web research
-- Real-time web search using Tavily
-- Automated source extraction
-- Web page content scraping
-- Structured research report generation
-- AI-based report evaluation
-- Dedicated Writer and Critic chains
-- Interactive Streamlit interface
-- Source URLs included in research output
-- Mistral AI integration
-- Modular Python architecture
-- Suitable for research, learning, technical topics, and general information gathering
+- Python
+- Streamlit
+- LangChain
+- Mistral AI
+- Tavily
+- BeautifulSoup
+- Requests
+- python-dotenv
 
----
+## Project Structure
 
-## How It Works
+    ResearchPilot/
+    ├── app.py
+    ├── agents.py
+    ├── pipeline.py
+    ├── tools.py
+    ├── requirements.txt
+    ├── README.md
+    └── .gitignore
 
-ResearchPilot processes a research request through multiple stages.
+## Installation
 
-### 1. Research Topic
+### Clone the Repository
 
-The user enters a topic into the Streamlit application.
+    git clone https://github.com/aniketjadhav25000/ResearchPilot.git
+    cd ResearchPilot
 
-Example:
+### Install Dependencies
 
-```text
-Impact of Generative AI on Software Development
+    pip install -r requirements.txt
+
+## Environment Variables
+
+Create a `.env` file in the project root and add:
+
+    MISTRAL_API_KEY=your_mistral_api_key
+    TAVILY_API_KEY=your_tavily_api_key
+
+## Run Locally
+
+    streamlit run app.py
+
+## Workflow
+
+1. User enters a research topic.
+2. Tavily searches for relevant web sources.
+3. The selected source is scraped and cleaned.
+4. Mistral generates a structured research report.
+5. The Critic Chain evaluates the report.
+6. The final research output is displayed in the Streamlit application.
+
+## Author
+
+Aniket Jadhav

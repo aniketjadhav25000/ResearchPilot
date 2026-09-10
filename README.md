@@ -1,6 +1,6 @@
 # ResearchPilot
 
-ResearchPilot is a Generative AI research assistant that automates the process of searching the web, extracting useful information, generating a structured research report, and critically reviewing the final output.
+ResearchPilot is a Generative AI **multi-agent research system** that automates web search, information extraction, report generation, and critical evaluation to produce structured research reports.
 
 ## Live Project
 
@@ -9,59 +9,24 @@ https://research-pilott.streamlit.app/
 ## Features
 
 - Web search using Tavily
-- URL content extraction and cleaning
-- AI-generated research reports
-- Automated report critique and scoring
-- Structured research workflow
+- Web content extraction and cleaning
+- AI-powered report generation
+- Automated report evaluation and scoring
+- Multi-agent research workflow
 - Streamlit-based interface
-- Mistral AI for report generation and evaluation
 
 ## Agent Architecture
 
-Research Topic  
-↓  
-Search Agent  
-↓  
-Reader Agent  
-↓  
-Writer Chain  
-↓  
-Critic Chain  
-↓  
-Final Research Report
-
-### Agents
-
-**Search Agent**
-- Searches the web for relevant and recent information.
-- Returns useful sources and URLs.
-
-**Reader Agent**
-- Scrapes and cleans content from selected web pages.
-- Removes unnecessary HTML elements and extracts readable content.
-
-**Writer Chain**
-- Combines search results and extracted content.
-- Generates a structured research report with:
-  - Introduction
-  - Key Findings
-  - Conclusion
-  - Sources
-
-**Critic Chain**
-- Reviews the generated report.
-- Provides a score, strengths, areas for improvement, and an overall verdict.
+Research Topic → Search → Reader → Writer → Critic → Final Report
 
 ## Tech Stack
 
-- Python
-- Streamlit
-- LangChain
-- Mistral AI
-- Tavily
-- BeautifulSoup
-- Requests
-- python-dotenv
+- **Language:** Python
+- **Framework:** Streamlit
+- **AI & Orchestration:** LangChain, Mistral AI
+- **Search:** Tavily
+- **Web Scraping:** BeautifulSoup, Requests
+- **Configuration:** python-dotenv
 
 ## Project Structure
 
@@ -87,7 +52,7 @@ Final Research Report
 
 ## Environment Variables
 
-Create a `.env` file in the project root and add:
+Create a `.env` file in the project root:
 
     MISTRAL_API_KEY=your_mistral_api_key
     TAVILY_API_KEY=your_tavily_api_key
@@ -99,11 +64,11 @@ Create a `.env` file in the project root and add:
 ## Workflow
 
 1. User enters a research topic.
-2. Tavily searches for relevant web sources.
-3. The selected source is scraped and cleaned.
-4. Mistral generates a structured research report.
-5. The Critic Chain evaluates the report.
-6. The final research output is displayed in the Streamlit application.
+2. Tavily searches for relevant sources.
+3. Web content is extracted and cleaned.
+4. Mistral generates the research report.
+5. The Critic evaluates and scores the report.
+6. The final research report is displayed.
 
 ## Author
 

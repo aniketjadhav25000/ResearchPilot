@@ -43,6 +43,23 @@ Research Topic → Search → Reader → Writer → Critic → Final Report
     ├── README.md
     └── .gitignore
 
+## Screenshots
+
+### Research Interface
+
+<img width="1919" height="870" alt="image" src="https://github.com/user-attachments/assets/ebdda4d3-43c3-4492-821e-97d3f7067a65" />
+
+
+### Generated Research Report
+
+<img width="1919" height="860" alt="image" src="https://github.com/user-attachments/assets/65b3d68a-7a4e-4bde-8ab2-0d457fdf438a" />
+
+
+### Critic Evaluation
+
+<img width="1919" height="869" alt="image" src="https://github.com/user-attachments/assets/ad4b4fd6-524c-4fe6-838d-b4558bf8b139" />
+
+
 ## Installation
 
 ### Clone the Repository

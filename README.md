@@ -1,7 +1,10 @@
 # ResearchPilot
 
-ResearchPilot is a Generative AI **multi-agent research system** that automates web search, information extraction, report generation, and critical evaluation to produce structured research reports.
+ResearchPilot is a Generative AI **multi-agent research system** designed to simplify and automate the research process. Instead of manually searching multiple websites, reading lengthy pages, and organizing information into a report, ResearchPilot handles these steps through a structured AI workflow.
 
+The system takes a **research topic** as input and first searches the web for relevant and recent information using Tavily. It then extracts and cleans useful content from the selected web pages. The collected information is passed to the **Writer Agent**, which uses Mistral AI to generate a structured research report. Finally, the **Critic Agent** reviews the generated report, evaluates its quality, and provides a score along with strengths and areas for improvement.
+
+This multi-agent workflow helps turn raw web information into a clear, structured, and critically evaluated research report with minimal manual effort.
 ## Live Project
 
 https://research-pilott.streamlit.app/

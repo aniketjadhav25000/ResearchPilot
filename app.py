@@ -1,6 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 from pipeline import run_research_pipeline
+import html
 
 
 # ============================================================
@@ -9,9 +10,9 @@ from pipeline import run_research_pipeline
 
 st.set_page_config(
     page_title="ResearchPilot",
-    page_icon="◈",
+    page_icon="✦",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="collapsed"
 )
 
 
@@ -19,1454 +20,1770 @@ st.set_page_config(
 # SESSION STATE
 # ============================================================
 
-if "result" not in st.session_state:
-    st.session_state.result = None
-
-if "topic" not in st.session_state:
-    st.session_state.topic = ""
-
-if "researching" not in st.session_state:
-    st.session_state.researching = False
-
-if "history" not in st.session_state:
-    st.session_state.history = []
+st.session_state.setdefault("topic", "")
+st.session_state.setdefault("result", None)
+st.session_state.setdefault("researching", False)
+st.session_state.setdefault("scroll_to_progress", False)
 
 
 # ============================================================
 # GLOBAL CSS
-# OCEAN BLUE + EMERALD THEME
 # ============================================================
 
-st.html(
-    """
-    <style>
+st.html("""
+<style>
 
-    /* ========================================================
-       COLOR THEME
-       Ocean Blue + Emerald
-       ======================================================== */
+@import url(
+'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap'
+);
 
-    :root {
-        --bg: #050B14;
-        --bg-2: #07111D;
 
-        --card: #0B1422;
-        --card-2: #101B2C;
+/* ============================================================
+   GLOBAL
+   ============================================================ */
 
-        --border: #1D3045;
-        --border-hover: #2C4963;
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background: #050812;
+}
 
-        --text: #F1F5F9;
-        --text-2: #94A3B8;
-        --text-3: #64748B;
+.stApp {
+    min-height: 100vh;
+    background:
+        radial-gradient(
+            circle at 80% 5%,
+            rgba(112,72,235,.14),
+            transparent 27%
+        ),
+        radial-gradient(
+            circle at 10% 35%,
+            rgba(39,105,190,.05),
+            transparent 25%
+        ),
+        linear-gradient(
+            180deg,
+            #050812 0%,
+            #060a14 100%
+        );
+    color: #eef1f7;
+}
 
-        --blue: #0EA5E9;
-        --blue-light: #38BDF8;
-        --blue-dark: #0284C7;
+.block-container {
+    width: 100%;
+    max-width: 1180px;
+    padding: 2px 28px 50px;
+}
 
-        --emerald: #10B981;
-        --emerald-light: #34D399;
-        --emerald-dark: #059669;
+#MainMenu,
+header,
+footer {
+    visibility: hidden;
+}
 
-        --cyan: #67E8F9;
+* {
+    box-sizing: border-box;
+}
+
+button,
+input {
+    font-family: "DM Sans", sans-serif !important;
+}
+
+
+/* ============================================================
+   BRAND
+   ============================================================ */
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 38px;
+    margin-bottom: 0px;
+    margin-top: 10px;
+}
+
+.brand-mark {
+    color: #a66aff;
+    font-size: 21px;
+    text-shadow: 0 0 16px rgba(166,106,255,.65);
+}
+
+.brand-name {
+    color: #cbd1dc;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+
+/* ============================================================
+   HERO
+   ============================================================ */
+
+.hero {
+    position: relative;
+    min-height: 340px;
+    overflow: hidden;
+    border: 1px solid #1b2538;
+    border-radius: 14px;
+    margin-top: 14px;
+    background:
+        radial-gradient(
+            circle at 77% 50%,
+            rgba(108,65,225,.09),
+            transparent 30%
+        ),
+        linear-gradient(
+            135deg,
+            #0c1220,
+            #070c17
+        );
+}
+
+.hero-copy {
+    position: relative;
+    z-index: 5;
+    width: 56%;
+    padding: 28px 42px;
+}
+
+.hero-project-name {
+    margin: 0 0 14px;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: clamp(46px, 6vw, 68px);
+    font-weight: 700;
+    line-height: .98;
+    letter-spacing: -.055em;
+    white-space: nowrap;
+}
+
+.hero-project-name .research {
+    color: #a66aff;
+}
+
+.hero-project-name .pilot {
+    background: linear-gradient(90deg, #d45dc9, #ff806e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-kicker {
+    margin-bottom: 16px;
+    color: #b078ff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .18em;
+}
+
+.hero-title {
+    margin: 0;
+    color: #f3f5f8;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: clamp(46px, 6vw, 68px);
+    font-weight: 700;
+    line-height: .98;
+    letter-spacing: -.055em;
+}
+
+.hero-title .gradient {
+    background:
+        linear-gradient(
+            90deg,
+            #9561ff,
+            #d45dc9,
+            #ff806e
+        );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-description {
+    max-width: 440px;
+    margin-top: 21px;
+    color: #8994a7;
+    font-size: 16px;
+    line-height: 1.75;
+}
+
+
+/* ============================================================
+   ORBIT
+   ============================================================ */
+
+.orbit-area {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 46%;
+    height: 100%;
+}
+
+.orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 285px;
+    height: 285px;
+    border: 1px solid rgba(133,90,255,.18);
+    border-radius: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.orbit-2 {
+    width: 218px;
+    height: 218px;
+    border-color: rgba(134,89,255,.22);
+}
+
+.orbit-3 {
+    width: 158px;
+    height: 158px;
+    border-color: rgba(175,92,255,.25);
+}
+
+.orbit-4 {
+    width: 96px;
+    height: 96px;
+    border-color: rgba(202,104,255,.30);
+}
+
+.orbit-diagonal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300px;
+    height: 118px;
+    border: 1px solid rgba(210,93,200,.28);
+    border-radius: 50%;
+    transform: translate(-50%,-50%) rotate(-22deg);
+}
+
+.core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 53px;
+    height: 53px;
+    border-radius: 12px;
+    background:
+        linear-gradient(
+            135deg,
+            #9e64ff,
+            #6241d1
+        );
+    box-shadow:
+        0 0 36px rgba(122,73,238,.58),
+        inset 0 0 16px rgba(255,255,255,.12);
+    transform: translate(-50%,-50%) rotate(45deg);
+    animation: corePulse 3s ease-in-out infinite;
+}
+
+.core::after {
+    content: "✦";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    transform: rotate(-45deg);
+}
+
+@keyframes corePulse {
+
+    0%,100% {
+        transform:
+            translate(-50%,-50%)
+            rotate(45deg)
+            scale(.94);
     }
 
+    50% {
+        transform:
+            translate(-50%,-50%)
+            rotate(45deg)
+            scale(1.06);
+    }
+}
 
-    /* ========================================================
-       GLOBAL
-       ======================================================== */
+.planet {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    box-shadow: 0 0 15px currentColor;
+}
 
-    html,
-    body {
-        margin: 0;
-        padding: 0;
-        background: var(--bg);
+.planet-1 {
+    top: 25%;
+    right: 20%;
+    color: #ff7187;
+    background: #ff7187;
+}
+
+.planet-2 {
+    right: 22%;
+    bottom: 23%;
+    color: #ff6685;
+    background: #ff6685;
+}
+
+.planet-3 {
+    top: 30%;
+    left: 20%;
+    color: #8d6cff;
+    background: #8d6cff;
+}
+
+.planet-4 {
+    bottom: 28%;
+    left: 24%;
+    color: #b079ff;
+    background: #b079ff;
+}
+
+
+/* ============================================================
+   RESEARCH WORKSPACE
+   ============================================================ */
+/*
+
+   IMPORTANT:
+   The workspace is now a real Streamlit container:
+       st.container(key="workspace")
+
+   This means the title, input and button are actually
+   contained inside the same visual card.
+*/
+
+.st-key-workspace {
+    position: relative;
+    z-index: 10;
+
+    margin: -2px 32px 34px 0px !important;
+    padding: 22px 24px 24px !important;
+
+    border: 1px solid #49328d;
+    border-radius: 11px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #111827,
+            #0a111e
+        );
+
+    box-shadow:
+        0 16px 45px rgba(0,0,0,.30);
+}
+
+
+/* Workspace heading */
+
+.workspace-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    margin-bottom: 15px;
+
+    color: #eef1f6;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.workspace-icon {
+    color: #ae70ff;
+    font-size: 20px;
+}
+
+
+/* Input */
+
+.stTextInput > label {
+    display: none !important;
+}
+
+.stTextInput input {
+    width: 100% !important;
+
+    height: 50px !important;
+    min-height: 50px !important;
+
+    padding: 0 16px !important;
+
+    background: #141c2c !important;
+
+    border: 1px solid #27344a !important;
+    border-radius: 8px !important;
+
+    color: #eef1f6 !important;
+
+    font-size: 13px !important;
+}
+
+.stTextInput input::placeholder {
+    color: #69768b !important;
+}
+
+.stTextInput input:focus {
+    border-color: #8058e1 !important;
+
+    box-shadow:
+        0 0 0 1px rgba(128,88,225,.20),
+        0 0 18px rgba(111,69,215,.08) !important;
+}
+
+
+/* Investigate */
+
+.start-button {
+    width: 100%;
+}
+
+@media(min-width:701px) {
+    .st-key-investigate_button {
+        width: 100% !important;
+        margin-top: 2px !important;
+        transform: translateY(-18px);
+    }
+}
+
+.start-button button {
+    width: 100% !important;
+
+    height: 50px !important;
+    min-height: 50px !important;
+
+    margin: 0 !important;
+
+    border: none !important;
+    border-radius: 8px !important;
+
+    background:
+        linear-gradient(
+            110deg,
+            #6841db,
+            #b34bc3,
+            #fb786d
+        ) !important;
+
+    color: white !important;
+
+    font-size: 12px !important;
+    font-weight: 700 !important;
+
+    box-shadow:
+        0 8px 24px rgba(109,63,211,.20);
+
+    transition:
+        transform .2s ease,
+        filter .2s ease;
+}
+
+.start-button button:hover {
+    filter: brightness(1.09);
+    transform: translateY(-1px);
+}
+
+
+/* ============================================================
+   PIPELINE
+   ============================================================ */
+
+.pipeline-section {
+    margin-top: 4px;
+}
+
+.pipeline-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.pipeline-heading-left {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.pipeline-spark {
+    color: #aa6cff;
+    font-size: 20px;
+}
+
+.pipeline-title {
+    color: #eef1f5;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.pipeline-count {
+    padding: 6px 10px;
+
+    border: 1px solid #263249;
+    border-radius: 999px;
+
+    background: #0d1524;
+
+    color: #8793a6;
+
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.pipeline-subtitle {
+    margin-bottom: 14px;
+
+    color: #718096;
+    font-size: 10px;
+}
+
+.pipeline-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.pipeline-card {
+    position: relative;
+
+    min-height: 142px;
+    padding: 16px;
+
+    overflow: hidden;
+
+    border: 1px solid #242f43;
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #101827,
+            #0b1220
+        );
+}
+
+.pipeline-card::after {
+    content: "";
+
+    position: absolute;
+    right: -30px;
+    bottom: -30px;
+
+    width: 90px;
+    height: 90px;
+
+    border-radius: 50%;
+
+    background: rgba(116,67,220,.06);
+
+    filter: blur(18px);
+}
+
+.pipeline-icon {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 12px;
+
+    border-radius: 50%;
+
+    background: rgba(119,70,221,.12);
+
+    color: #b274ff;
+
+    font-size: 16px;
+}
+
+.pipeline-card:nth-child(2) .pipeline-icon {
+    background: rgba(65,121,219,.11);
+    color: #64a4ff;
+}
+
+.pipeline-card:nth-child(3) .pipeline-icon {
+    background: rgba(57,177,112,.10);
+    color: #55d995;
+}
+
+.pipeline-card:nth-child(4) .pipeline-icon {
+    background: rgba(224,73,119,.10);
+    color: #ff7199;
+}
+
+.pipeline-number {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+
+    color: #66738a;
+    font-size: 9px;
+}
+
+.pipeline-name {
+    color: #edf0f5;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.pipeline-description {
+    max-width: 190px;
+    margin-top: 7px;
+
+    color: #78859a;
+
+    font-size: 9px;
+    line-height: 1.55;
+}
+
+
+/* ============================================================
+   RESEARCH PROGRESS
+   ============================================================ */
+
+.progress-anchor {
+    scroll-margin-top: 20px;
+}
+
+.loading-card {
+    margin: 28px 32px 32px;
+
+    padding: 29px;
+
+    border: 1px solid #503695;
+    border-radius: 11px;
+
+    background:
+        radial-gradient(
+            circle at 20% 50%,
+            rgba(109,62,220,.11),
+            transparent 31%
+        ),
+        #0b1220;
+
+    box-shadow:
+        0 15px 45px rgba(0,0,0,.24);
+}
+
+.loading-layout {
+    display: grid;
+    grid-template-columns: 36% 64%;
+    align-items: center;
+}
+
+.loading-visual {
+    position: relative;
+
+    width: 200px;
+    height: 125px;
+
+    margin: auto;
+}
+
+.loading-ring {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    width: 190px;
+    height: 55px;
+
+    border: 1px solid rgba(147,100,255,.35);
+    border-radius: 50%;
+
+    transform:
+        translate(-50%,-50%)
+        rotate(-8deg);
+}
+
+.loading-ring.two {
+    width: 150px;
+    height: 43px;
+
+    border-color: rgba(198,94,230,.32);
+}
+
+.loading-ring.three {
+    width: 110px;
+    height: 32px;
+
+    border-color: rgba(105,106,246,.36);
+}
+
+.loading-core {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    width: 29px;
+    height: 29px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle at 35% 30%,
+            #e7c9ff,
+            #a35eff 45%,
+            #5732be
+        );
+
+    box-shadow:
+        0 0 28px rgba(156,88,255,.65);
+
+    transform:
+        translate(-50%,-50%);
+
+    animation:
+        loadingCore 1.5s ease-in-out infinite;
+}
+
+@keyframes loadingCore {
+
+    0%,100% {
+        transform:
+            translate(-50%,-50%)
+            scale(.85);
     }
 
-    .stApp {
-        min-height: 100vh;
-
-        background:
-            radial-gradient(
-                circle at 8% -10%,
-                rgba(14, 165, 233, 0.11),
-                transparent 30%
-            ),
-
-            radial-gradient(
-                circle at 94% 10%,
-                rgba(16, 185, 129, 0.08),
-                transparent 28%
-            ),
-
-            radial-gradient(
-                circle at 50% 110%,
-                rgba(14, 165, 233, 0.045),
-                transparent 32%
-            ),
-
-            var(--bg);
+    50% {
+        transform:
+            translate(-50%,-50%)
+            scale(1.1);
     }
+}
+
+.loading-dot {
+    position: absolute;
+
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: #9870ff;
+
+    box-shadow:
+        0 0 10px #9870ff;
+
+    animation:
+        loadingDot 2s ease-in-out infinite;
+}
+
+.loading-dot.one {
+    top: 18px;
+    left: 28px;
+}
+
+.loading-dot.two {
+    right: 19px;
+    bottom: 25px;
+
+    background: #ff718f;
+
+    box-shadow:
+        0 0 10px #ff718f;
+
+    animation-delay: .5s;
+}
+
+.loading-dot.three {
+    top: 50px;
+    right: 7px;
+
+    animation-delay: 1s;
+}
+
+@keyframes loadingDot {
+
+    50% {
+        transform: translateY(-8px);
+        opacity: .45;
+    }
+}
+
+.loading-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: #f0f2f6;
+
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.loading-title-icon {
+    color: #b36aff;
+}
+
+.loading-topic {
+    margin-top: 6px;
+
+    color: #78859a;
+    font-size: 10px;
+}
+
+.loading-steps {
+    margin-top: 18px;
+}
+
+.loading-step {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    margin-bottom: 9px;
+
+    color: #818da0;
+
+    font-size: 10px;
+}
+
+.loading-step-dot {
+    width: 17px;
+    height: 17px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #4c3a7c;
+    border-radius: 50%;
+
+    color: #aa77ff;
+
+    font-size: 8px;
+}
+
+.loading-step.active {
+    color: #c6ccd6;
+}
+
+.loading-step.active .loading-step-dot {
+    background: #6948c1;
+
+    box-shadow:
+        0 0 10px rgba(124,78,223,.4);
+}
+
+.progress {
+    height: 5px;
+
+    margin-top: 15px;
+
+    overflow: hidden;
+
+    border-radius: 99px;
+
+    background: #1b2537;
+}
+
+.progress-bar {
+    width: 50%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            #7445dc,
+            #b75ac7,
+            #ff7b82
+        );
+
+    animation:
+        progressMove 1.7s ease-in-out infinite;
+}
+
+@keyframes progressMove {
+
+    0% {
+        transform: translateX(-110%);
+    }
+
+    50% {
+        transform: translateX(70%);
+    }
+
+    100% {
+        transform: translateX(210%);
+    }
+}
+
+
+/* ============================================================
+   RESULTS
+   ============================================================ */
+
+.results {
+    margin: 42px 32px 0;
+    scroll-margin-top: 20px;
+}
+
+.results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 15px;
+}
+
+.results-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.results-icon {
+    color: #ae6cff;
+    font-size: 22px;
+}
+
+.results-title {
+    color: #eef0f5;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.results-subtitle {
+    margin-top: 4px;
+
+    color: #707d92;
+
+    font-size: 10px;
+}
+
+.completed {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 7px 10px;
+
+    border: 1px solid rgba(63,181,126,.18);
+    border-radius: 999px;
+
+    background: rgba(48,160,107,.07);
+
+    color: #4ed497;
+
+    font-size: 8px;
+}
+
+.completed-dot {
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: #42d28d;
+}
+
+
+/* ============================================================
+   TABS
+   ============================================================ */
+
+.stTabs [data-baseweb="tab-list"] {
+    gap: 0;
+
+    border-bottom: 1px solid #202a3d;
+}
+
+.stTabs [data-baseweb="tab"] {
+    min-height: 40px !important;
+
+    padding: 0 18px !important;
+
+    color: #7c889c !important;
+
+    font-size: 10px !important;
+    font-weight: 600 !important;
+}
+
+.stTabs [aria-selected="true"] {
+    color: #bd7cff !important;
+}
+
+.stTabs [data-baseweb="tab-highlight"] {
+    height: 2px !important;
+
+    background: #9c5dff !important;
+}
+
+
+/* ============================================================
+   REPORT
+   ============================================================ */
+
+.report-card {
+    margin-top: 15px;
+
+    padding: 23px;
+
+    border: 1px solid #202b3e;
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #101827,
+            #0b1220
+        );
+}
+
+.report-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 185px;
+
+    gap: 27px;
+}
+
+.report-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding-bottom: 14px;
+
+    border-bottom: 1px solid #202a3b;
+}
+
+.report-icon {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: rgba(134,71,220,.16);
+
+    color: #b46cff;
+
+    font-size: 15px;
+}
+
+.report-name {
+    color: #eef1f5;
+
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.report-topic {
+    margin-top: 3px;
+
+    color: #707c90;
+
+    font-size: 9px;
+}
+
+.report-body {
+    margin-top: 18px;
+}
+
+.report-body p {
+    color: #b2bccb !important;
+
+    font-size: 12px !important;
+
+    line-height: 1.8 !important;
+}
+
+.report-body h1,
+.report-body h2,
+.report-body h3 {
+    color: #eef1f5 !important;
+
+    font-family: "Space Grotesk", sans-serif !important;
+}
+
+.report-body h1 {
+    font-size: 25px !important;
+}
+
+.report-body h2 {
+    margin-top: 27px !important;
+
+    font-size: 19px !important;
+}
+
+.report-body h3 {
+    font-size: 16px !important;
+}
+
+.report-body strong {
+    color: #eef1f5 !important;
+}
+
+.report-body li {
+    color: #b2bccb !important;
+
+    font-size: 11px !important;
+
+    line-height: 1.75 !important;
+}
+
+.report-body a {
+    color: #b579ff !important;
+}
+
+
+/* ============================================================
+   AT A GLANCE
+   ============================================================ */
+
+.glance {
+    padding-left: 20px;
+
+    border-left: 1px solid #202a3b;
+}
+
+.glance-title {
+    margin-bottom: 20px;
+
+    color: #e7eaf0;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.metric {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 17px;
+}
+
+.metric-icon {
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: rgba(127,67,219,.13);
+
+    color: #b36dff;
+
+    font-size: 10px;
+}
+
+.metric-value {
+    color: #edf0f4;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.metric-label {
+    margin-top: 2px;
+
+    color: #68758a;
+
+    font-size: 8px;
+}
+
+
+/* ============================================================
+   CRITIC
+   ============================================================ */
+
+.critic-card {
+    display: grid;
+
+    grid-template-columns: 1fr 110px;
+
+    gap: 20px;
+
+    align-items: center;
+
+    margin-top: 15px;
+
+    padding: 19px;
+
+    border: 1px solid #202b3e;
+    border-radius: 10px;
+
+    background: #0d1524;
+}
+
+.critic-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+}
+
+.critic-icon {
+    width: 36px;
+    height: 36px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: rgba(220,64,113,.11);
+
+    color: #ff6e98;
+}
+
+.critic-title {
+    color: #edf0f5;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.critic-description {
+    margin-top: 7px;
+
+    color: #aab4c2;
+
+    font-size: 10px;
+    line-height: 1.7;
+}
+
+.review-score {
+    padding-left: 18px;
+
+    border-left: 1px solid #222d40;
+}
+
+.review-label {
+    color: #707d91;
+
+    font-size: 8px;
+}
+
+.review-value {
+    margin-top: 5px;
+
+    color: #ff74a2;
+
+    font-size: 22px;
+    font-weight: 700;
+}
+
+
+/* ============================================================
+   DOWNLOAD
+   ============================================================ */
+
+.download-area {
+    margin-top: 14px;
+}
+
+[data-testid="stDownloadButton"] button {
+    min-height: 38px !important;
+
+    border: 1px solid #29364b !important;
+    border-radius: 7px !important;
+
+    background: #101a2a !important;
+
+    color: #bdc6d3 !important;
+
+    font-size: 9px !important;
+}
+
+
+/* ============================================================
+   NEW RESEARCH
+   ============================================================ */
+
+.new-research {
+    margin-top: 30px;
+}
+
+.new-research button {
+    min-height: 39px !important;
+
+    border: 1px solid #28344a !important;
+    border-radius: 7px !important;
+
+    background: #0d1524 !important;
+
+    color: #a6b0c0 !important;
+
+    font-size: 10px !important;
+}
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+
+    margin: 40px 32px 0;
+
+    padding-top: 18px;
+
+    border-top: 1px solid #151e2d;
+
+    color: #566277;
+
+    font-size: 8px;
+}
+
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media(max-width:900px) {
+
+    .hero-copy {
+        width: 60%;
+    }
+
+    .hero-title {
+        font-size: 50px;
+    }
+
+    .orbit-area {
+        width: 45%;
+    }
+
+    .pipeline-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .report-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .glance {
+        display: grid;
+
+        grid-template-columns:
+            repeat(4,1fr);
+
+        gap: 9px;
+
+        padding: 18px 0 0;
+
+        border-top: 1px solid #202a3b;
+        border-left: 0;
+    }
+
+    .glance-title {
+        grid-column: 1 / -1;
+
+        margin-bottom: 3px;
+    }
+
+    .metric {
+        margin-bottom: 0;
+    }
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media(max-width:700px) {
 
     .block-container {
-        max-width: 1180px;
-        padding: 0.45rem 2.5rem 2.5rem;
+        padding: 12px 12px 35px !important;
     }
 
-    #MainMenu,
-    header,
-    footer {
-        visibility: hidden;
+    .brand {
+        margin-bottom: 12px;
     }
 
-    html,
-    body,
-    [class*="css"] {
-        font-family:
-            "Manrope",
-            sans-serif;
+    .brand-name {
+        font-size: 10px;
     }
-
-
-    /* ========================================================
-       HERO
-       ======================================================== */
 
     .hero {
-        padding: 1.15rem 0 1.05rem;
+        min-height: 505px;
     }
 
-    .hero-top {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        margin-bottom: 11px;
+    .hero-copy {
+        width: 100%;
+        padding: 28px 20px;
     }
 
-    .hero-dot {
-        width: 7px;
-        height: 7px;
-        flex-shrink: 0;
-
-        border-radius: 50%;
-
-        background: var(--blue);
-
-        box-shadow:
-            0 0 15px
-            rgba(14, 165, 233, 0.9);
+    .hero-project-name {
+        font-size: 43px;
+        margin-bottom: 12px;
+        white-space: normal;
     }
 
-    .hero-label {
-        font-family:
-            "Space Mono",
-            monospace;
-
-        font-size: 10px;
-        font-weight: 700;
-
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-
-        color: #71839A;
+    .hero-kicker {
+        font-size: 9px;
     }
 
-    .hero h1 {
-        margin: 0;
-
-        font-size:
-            clamp(3.2rem, 6vw, 5rem);
-
-        line-height: 0.95;
-        letter-spacing: -0.055em;
-
-        font-weight: 800;
-
-        color: var(--text);
-    }
-
-    .hero-accent {
-        background:
-            linear-gradient(
-                135deg,
-                var(--blue),
-                var(--emerald)
-            );
-
-        -webkit-background-clip: text;
-        background-clip: text;
-
-        -webkit-text-fill-color: transparent;
+    .hero-title {
+        font-size: 43px;
     }
 
     .hero-description {
-        max-width: 680px;
+        max-width: 330px;
+        font-size: 10px;
+    }
 
-        margin-top: 13px;
+    .orbit-area {
+        top: 205px;
+        right: 0;
+        width: 100%;
+        height: 280px;
+    }
 
-        color: var(--text-2);
+    .orbit {
+        width: 245px;
+        height: 245px;
+    }
 
-        font-size: 14px;
-        font-weight: 500;
+    .orbit-2 {
+        width: 190px;
+        height: 190px;
+    }
 
-        line-height: 1.65;
+    .orbit-3 {
+        width: 140px;
+        height: 140px;
+    }
+
+    .orbit-4 {
+        width: 90px;
+        height: 90px;
+    }
+
+    .orbit-diagonal {
+        width: 270px;
     }
 
 
     /* ========================================================
-       DIVIDER
+       MOBILE WORKSPACE
+       Kept consistent with previous mobile layout.
        ======================================================== */
 
-    .top-line {
-        height: 1px;
-
-        background:
-            linear-gradient(
-                90deg,
-                transparent,
-                rgba(14, 165, 233, 0.30),
-                rgba(16, 185, 129, 0.20),
-                transparent
-            );
-
-        margin-bottom: 23px;
+    .st-key-workspace {
+        margin: 0 0 27px !important;
+        padding: 15px !important;
     }
-
-
-    /* ========================================================
-       SECTION LABEL
-       ======================================================== */
 
     .workspace-title {
-        font-family:
-            "Space Mono",
-            monospace;
-
-        font-size: 10px;
-        font-weight: 700;
-
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-
-        color: #687B91;
-
-        margin-bottom: 8px;
-    }
-
-
-    /* ========================================================
-       INPUT AREA
-       ======================================================== */
-
-    .input-shell {
-        background:
-            linear-gradient(
-                145deg,
-                rgba(11, 20, 34, 0.98),
-                rgba(6, 14, 24, 0.98)
-            );
-
-        border:
-            1px solid var(--border);
-
-        border-radius: 14px;
-
-        padding: 18px;
-
-        box-shadow:
-            0 15px 40px
-            rgba(0, 0, 0, 0.22);
-    }
-
-    .input-shell:hover {
-        border-color:
-            var(--border-hover);
-    }
-
-
-    /* ========================================================
-       TEXT INPUT
-       ======================================================== */
-
-    .stTextInput > label {
-        font-family:
-            "Space Mono",
-            monospace !important;
-
-        font-size: 10px !important;
-        font-weight: 700 !important;
-
-        letter-spacing: 0.14em !important;
-        text-transform: uppercase !important;
-
-        color:
-            var(--blue-light) !important;
+        font-size: 15px;
     }
 
     .stTextInput input {
-        background:
-            #060D17 !important;
-
-        border:
-            1px solid
-            #20354B !important;
-
-        border-radius:
-            9px !important;
-
-        color:
-            var(--text) !important;
-
-        font-family:
-            "Manrope",
-            sans-serif !important;
-
-        font-size:
-            14px !important;
-
-        font-weight:
-            500 !important;
-
-        min-height:
-            42px !important;
-
-        transition:
-            all 0.2s ease !important;
+        min-height: 49px !important;
+        font-size: 12px !important;
     }
 
-    .stTextInput input::placeholder {
-        color:
-            #586B80 !important;
+    .start-button button {
+        min-height: 49px !important;
+
+        margin-top: 8px !important;
+
+        font-size: 11px !important;
     }
 
-    .stTextInput input:focus {
-        border-color:
-            var(--blue) !important;
-
-        box-shadow:
-            0 0 0 2px
-            rgba(14, 165, 233, 0.12) !important;
-    }
-
-
-    /* ========================================================
-       BUTTON BASE
-       ======================================================== */
-
-    div[data-testid="stButton"] button {
-        min-height:
-            42px !important;
-
-        border-radius:
-            9px !important;
-
-        font-family:
-            "Manrope",
-            sans-serif !important;
-
-        font-size:
-            13px !important;
-
-        font-weight:
-            700 !important;
-
-        transition:
-            all 0.2s ease !important;
-    }
-
-
-    /* ========================================================
-       START RESEARCH BUTTON
-       ======================================================== */
-
-    .research-button button {
-        width:
-            100% !important;
-
-        background:
-            linear-gradient(
-                135deg,
-                #0EA5E9,
-                #10B981
-            ) !important;
-
-        border:
-            none !important;
-
-        color:
-            #FFFFFF !important;
-
-        box-shadow:
-            0 8px 25px
-            rgba(14, 165, 233, 0.22) !important;
-    }
-
-    .research-button button:hover {
-        background:
-            linear-gradient(
-                135deg,
-                #38BDF8,
-                #34D399
-            ) !important;
-
-        transform:
-            translateY(-1px);
-
-        box-shadow:
-            0 11px 30px
-            rgba(14, 165, 233, 0.32) !important;
-    }
-
-
-    /* ========================================================
-       RESEARCHING BUTTON
-       ======================================================== */
-
-    .researching-button button {
-        width:
-            100% !important;
-
-        background:
-            linear-gradient(
-                135deg,
-                #087DB5,
-                #07855F
-            ) !important;
-
-        border:
-            1px solid
-            rgba(103, 232, 249, 0.15) !important;
-
-        color:
-            #E6F9FF !important;
-
-        cursor:
-            wait !important;
-
-        opacity:
-            0.96 !important;
-
-        box-shadow:
-            0 8px 25px
-            rgba(14, 165, 233, 0.18) !important;
-    }
-
-    .researching-button button:hover {
-        transform:
-            none !important;
-    }
-
-
-    /* ========================================================
-       SUGGESTED TOPICS
-       ======================================================== */
-
-    .examples-label {
-        font-family:
-            "Space Mono",
-            monospace;
-
-        font-size: 9px;
-        font-weight: 700;
-
-        color: #596B80;
-
-        letter-spacing: 0.11em;
-
-        margin-top: 11px;
-        margin-bottom: 7px;
-    }
-
-    .example-btn button {
-        min-height:
-            32px !important;
-
-        font-size:
-            10px !important;
-
-        font-weight:
-            500 !important;
-
-        background:
-            #09121E !important;
-
-        border:
-            1px solid
-            #1D3045 !important;
-
-        color:
-            #74869A !important;
-
-        box-shadow:
-            none !important;
-    }
-
-    .example-btn button:hover {
-        color:
-            var(--blue-light) !important;
-
-        border-color:
-            #31516C !important;
-
-        background:
-            #0D1927 !important;
-
-        transform:
-            none !important;
-    }
-
-
-    /* ========================================================
-       PIPELINE
-       ======================================================== */
-
-    .pipeline {
-        padding-left: 3px;
-    }
-
-    .pipeline-heading {
-        display:
-            flex;
-
-        align-items:
-            center;
-
-        justify-content:
-            space-between;
-
-        margin-bottom:
-            10px;
-    }
 
     .pipeline-title {
-        color:
-            #E6EDF4;
-
-        font-size:
-            19px;
-
-        font-weight:
-            800;
+        font-size: 16px;
     }
 
-    .pipeline-count {
-        font-family:
-            "Space Mono",
-            monospace;
+    .pipeline-subtitle {
+        font-size: 9px;
+    }
 
-        font-size:
-            9px;
+    .pipeline-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
 
-        font-weight:
-            700;
+    .pipeline-card {
+        min-height: 125px;
+        padding: 13px;
+    }
 
-        color:
-            #5E7187;
+    .pipeline-name {
+        font-size: 10px;
+    }
 
-        letter-spacing:
-            0.08em;
+    .pipeline-description {
+        font-size: 8px;
     }
 
 
-    /* ========================================================
-       AGENT CARD
-       ======================================================== */
-
-    .agent {
-        position:
-            relative;
-
-        padding:
-            13px 16px 13px 20px;
-
-        background:
-            linear-gradient(
-                145deg,
-                #0B1523,
-                #080F19
-            );
-
-        border:
-            1px solid
-            #1D3045;
-
-        border-radius:
-            11px;
-
-        margin-bottom:
-            7px;
-
-        transition:
-            all 0.2s ease;
+    .loading-card {
+        margin: 24px 0 27px;
+        padding: 22px 15px;
     }
 
-    .agent:hover {
-        border-color:
-            #31506A;
-
-        background:
-            #0D1827;
+    .loading-layout {
+        grid-template-columns: 1fr;
     }
 
-    .agent::before {
-        content:
-            "";
+    .loading-visual {
+        transform: scale(.82);
 
-        position:
-            absolute;
-
-        left:
-            0;
-
-        top:
-            9px;
-
-        bottom:
-            9px;
-
-        width:
-            2px;
-
-        background:
-            linear-gradient(
-                180deg,
-                var(--blue),
-                var(--emerald)
-            );
-
-        border-radius:
-            2px;
+        margin-top: -10px;
+        margin-bottom: -9px;
     }
 
-    .agent-header {
-        display:
-            flex;
-
-        align-items:
-            center;
-
-        gap:
-            9px;
+    .loading-title {
+        justify-content: center;
+        font-size: 15px;
     }
 
-    .agent-number {
-        font-family:
-            "Space Mono",
-            monospace;
-
-        font-size:
-            10px;
-
-        font-weight:
-            700;
-
-        color:
-            var(--blue-light);
+    .loading-topic {
+        text-align: center;
+        font-size: 9px;
     }
 
-    .agent-name {
-        color:
-            #DCE6EE;
-
-        font-size:
-            13px;
-
-        font-weight:
-            750;
-    }
-
-    .agent-status {
-        margin-left:
-            auto;
-
-        font-family:
-            "Space Mono",
-            monospace;
-
-        font-size:
-            8px;
-
-        font-weight:
-            700;
-
-        letter-spacing:
-            0.08em;
-
-        color:
-            #53677D;
-    }
-
-    .agent-description {
-        margin-top:
-            5px;
-
-        color:
-            #708399;
-
-        font-size:
-            10px;
-
-        font-weight:
-            500;
-
-        line-height:
-            1.45;
+    .loading-step {
+        font-size: 9px;
     }
 
 
-    /* ========================================================
-       RESULTS HEADER
-       ======================================================== */
-
-    .results-header {
-        display:
-            flex;
-
-        align-items:
-            flex-end;
-
-        justify-content:
-            space-between;
-
-        margin-top:
-            38px;
-
-        margin-bottom:
-            18px;
-
-        padding-top:
-            10px;
-
-        scroll-margin-top:
-            20px;
+    .results {
+        margin: 31px 0 0;
     }
 
     .results-title {
-        font-size:
-            32px;
-
-        font-weight:
-            850;
-
-        letter-spacing:
-            -0.035em;
-
-        color:
-            #F1F7FB;
+        font-size: 16px;
     }
 
     .results-subtitle {
-        color:
-            #73869B;
-
-        font-size:
-            12px;
-
-        font-weight:
-            500;
-
-        margin-top:
-            6px;
-    }
-
-    .results-tag {
-        font-family:
-            "Space Mono",
-            monospace;
-
-        font-size:
-            9px;
-
-        font-weight:
-            700;
-
-        color:
-            var(--emerald-light);
-
-        border:
-            1px solid
-            rgba(16, 185, 129, 0.25);
-
-        background:
-            rgba(16, 185, 129, 0.06);
-
-        border-radius:
-            999px;
-
-        padding:
-            6px 10px;
+        font-size: 9px;
     }
 
 
-    /* ========================================================
-       TABS
-       ======================================================== */
-
-    button[data-baseweb="tab"] {
-        color:
-            #687B90 !important;
-
-        font-size:
-            13px !important;
-
-        font-weight:
-            750 !important;
+    .report-card {
+        padding: 16px;
     }
 
-    button[data-baseweb="tab"][aria-selected="true"] {
-        color:
-            var(--blue-light) !important;
+    .report-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .report-body p {
+        font-size: 11px !important;
+    }
+
+    .report-body li {
+        font-size: 10px !important;
     }
 
 
-    /* ========================================================
-       REPORT CARD
-       ======================================================== */
-
-    .report-box {
-        margin-top:
-            18px;
-
-        padding:
-            27px 30px;
-
-        background:
-            linear-gradient(
-                145deg,
-                #0B1523,
-                #080F19
-            );
-
-        border:
-            1px solid
-            #20354A;
-
-        border-radius:
-            15px;
-
-        box-shadow:
-            0 18px 50px
-            rgba(0, 0, 0, 0.18);
-    }
-
-    .report-label {
-        font-family:
-            "Space Mono",
-            monospace;
-
-        font-size:
-            13px;
-
-        font-weight:
-            700;
-
-        letter-spacing:
-            0.13em;
-
-        color:
-            var(--blue-light);
-
-        text-transform:
-            uppercase;
-
-        padding-bottom:
-            14px;
-
-        margin-bottom:
-            22px;
-
-        border-bottom:
-            1px solid
-            #1E3347;
+    .glance {
+        grid-template-columns: 1fr 1fr;
     }
 
 
-    /* ========================================================
-       GENERATED MARKDOWN
-       ======================================================== */
-
-    .stMarkdown {
-        color:
-            #D1DCE5;
+    .critic-card {
+        grid-template-columns: 1fr;
     }
 
-    .stMarkdown p {
-        font-size:
-            16px;
+    .review-score {
+        padding: 12px 0 0;
 
-        font-weight:
-            500;
-
-        line-height:
-            1.82;
-
-        color:
-            #D0DBE4;
+        border-top: 1px solid #222d40;
+        border-left: 0;
     }
 
-    .stMarkdown strong {
-        font-weight:
-            800;
-
-        color:
-            #F0F6FA;
-    }
-
-    .stMarkdown h1 {
-        font-size:
-            36px;
-
-        font-weight:
-            850;
-
-        line-height:
-            1.18;
-
-        letter-spacing:
-            -0.035em;
-
-        color:
-            #F2F8FC;
-
-        margin-top:
-            30px;
-
-        margin-bottom:
-            14px;
-
-        padding-bottom:
-            10px;
-
-        border-bottom:
-            1px solid
-            #21374A;
-    }
-
-    .stMarkdown h2 {
-        font-size:
-            29px;
-
-        font-weight:
-            850;
-
-        line-height:
-            1.25;
-
-        letter-spacing:
-            -0.025em;
-
-        color:
-            #EAF4FA;
-
-        margin-top:
-            30px;
-
-        margin-bottom:
-            12px;
-    }
-
-    .stMarkdown h3 {
-        font-size:
-            23px;
-
-        font-weight:
-            800;
-
-        line-height:
-            1.3;
-
-        color:
-            var(--blue-light);
-
-        margin-top:
-            25px;
-
-        margin-bottom:
-            10px;
-    }
-
-    .stMarkdown h4 {
-        font-size:
-            19px;
-
-        font-weight:
-            800;
-
-        color:
-            var(--emerald-light);
-
-        margin-top:
-            20px;
-
-        margin-bottom:
-            8px;
-    }
-
-    .stMarkdown li {
-        font-size:
-            15px;
-
-        font-weight:
-            500;
-
-        line-height:
-            1.75;
-
-        color:
-            #C5D1DB;
-
-        margin-bottom:
-            6px;
-    }
-
-    .stMarkdown blockquote {
-        border-left:
-            3px solid
-            var(--blue);
-
-        padding:
-            10px 18px;
-
-        background:
-            rgba(14, 165, 233, 0.045);
-
-        color:
-            #B8C7D3;
-    }
-
-    .stMarkdown code {
-        color:
-            var(--cyan);
-
-        background:
-            #111D2B;
-
-        border-radius:
-            5px;
-
-        padding:
-            2px 6px;
-    }
-
-    .stMarkdown hr {
-        border:
-            none;
-
-        border-top:
-            1px solid
-            #213445;
-
-        margin:
-            28px 0;
-    }
-
-
-    /* ========================================================
-       REVIEW
-       ======================================================== */
-
-    .review-box {
-        margin-top:
-            18px;
-
-        padding:
-            25px;
-
-        background:
-            #0B1523;
-
-        border:
-            1px solid
-            rgba(16, 185, 129, 0.18);
-
-        border-radius:
-            15px;
-    }
-
-    .review-label {
-        font-family:
-            "Space Mono",
-            monospace;
-
-        font-size:
-            13px;
-
-        font-weight:
-            700;
-
-        letter-spacing:
-            0.13em;
-
-        color:
-            var(--emerald-light);
-
-        text-transform:
-            uppercase;
-
-        padding-bottom:
-            14px;
-
-        margin-bottom:
-            20px;
-
-        border-bottom:
-            1px solid
-            rgba(16, 185, 129, 0.13);
-    }
-
-
-    /* ========================================================
-       DOWNLOAD BUTTON
-       ======================================================== */
-
-    [data-testid="stDownloadButton"] button {
-        width:
-            auto !important;
-
-        min-width:
-            150px;
-
-        background:
-            #0D1927 !important;
-
-        border:
-            1px solid
-            #294158 !important;
-
-        color:
-            #BFCED9 !important;
-
-        font-size:
-            12px !important;
-
-        box-shadow:
-            none !important;
-    }
-
-    [data-testid="stDownloadButton"] button:hover {
-        background:
-            #122336 !important;
-
-        border-color:
-            var(--blue) !important;
-
-        color:
-            #DFF5FF !important;
-    }
-
-
-    /* ========================================================
-       FOOTER
-       ======================================================== */
 
     .footer {
-        margin-top:
-            45px;
+        margin-left: 0;
+        margin-right: 0;
 
-        padding-top:
-            16px;
+        flex-direction: column;
 
-        border-top:
-            1px solid
-            #142334;
+        gap: 7px;
+    }
+}
 
-        text-align:
-            center;
 
-        font-family:
-            "Space Mono",
-            monospace;
+/* ============================================================
+   SMALL PHONES
+   ============================================================ */
 
-        font-size:
-            9px;
+@media(max-width:480px) {
 
-        font-weight:
-            700;
+    .block-container {
+        padding-left: 9px !important;
+        padding-right: 9px !important;
+    }
 
-        color:
-            #465B70;
+    .hero {
+        min-height: 485px;
+    }
 
-        letter-spacing:
-            0.08em;
+    .hero-copy {
+        padding: 25px 16px;
+    }
+
+    .hero-project-name {
+        font-size: 39px;
+        margin-bottom: 10px;
+    }
+
+    .hero-title {
+        font-size: 39px;
+    }
+
+    .hero-description {
+        font-size: 9px;
+    }
+
+    .orbit-area {
+        top: 200px;
+
+        transform: scale(.86);
+
+        transform-origin: center top;
     }
 
 
-    /* ========================================================
-       MOBILE
-       ======================================================== */
+    .pipeline-grid {
+        grid-template-columns: 1fr;
+    }
 
-    @media (max-width: 768px) {
+    .pipeline-card {
+        min-height: 100px;
+    }
 
-        .block-container {
-            max-width:
-                100%;
+    .pipeline-description {
+        max-width: 280px;
 
-            padding:
-                0.7rem 1rem 2rem;
-        }
-
-        .hero {
-            padding:
-                1rem 0 1.15rem;
-        }
-
-        .hero-label {
-            font-size:
-                9px;
-        }
-
-        .hero h1 {
-            font-size:
-                3rem;
-
-            line-height:
-                0.98;
-        }
-
-        .hero-description {
-            font-size:
-                13px;
-
-            line-height:
-                1.65;
-        }
-
-        .input-shell {
-            padding:
-                16px;
-
-            border-radius:
-                13px;
-        }
-
-        .stTextInput input {
-            min-height:
-                46px !important;
-
-            font-size:
-                16px !important;
-        }
-
-        div[data-testid="stButton"] button {
-            min-height:
-                46px !important;
-        }
-
-        .pipeline {
-            padding-left:
-                0;
-
-            margin-top:
-                24px;
-        }
-
-        .pipeline-title {
-            font-size:
-                18px;
-        }
-
-        .agent {
-            padding:
-                14px 15px 14px 19px;
-        }
-
-        .results-header {
-            margin-top:
-                28px;
-
-            align-items:
-                flex-start;
-
-            flex-direction:
-                column;
-
-            gap:
-                10px;
-        }
-
-        .results-title {
-            font-size:
-                27px;
-        }
-
-        .report-box {
-            padding:
-                21px 17px;
-        }
-
-        .report-label {
-            font-size:
-                11px;
-        }
-
-        .stMarkdown p {
-            font-size:
-                14px;
-
-            line-height:
-                1.8;
-        }
-
-        .stMarkdown h1 {
-            font-size:
-                29px;
-        }
-
-        .stMarkdown h2 {
-            font-size:
-                24px;
-        }
-
-        .stMarkdown h3 {
-            font-size:
-                20px;
-        }
-
-        .stMarkdown h4 {
-            font-size:
-                17px;
-        }
-
-        .stMarkdown li {
-            font-size:
-                13px;
-        }
-
-        button[data-baseweb="tab"] {
-            font-size:
-                11px !important;
-
-            padding-left:
-                7px !important;
-
-            padding-right:
-                7px !important;
-        }
-
-        [data-testid="stDownloadButton"] button {
-            width:
-                100% !important;
-
-            min-width:
-                0;
-
-            min-height:
-                44px !important;
-        }
+        font-size: 9px;
     }
 
 
-    /* ========================================================
-       SMALL MOBILE
-       ======================================================== */
-
-    @media (max-width: 480px) {
-
-        .block-container {
-            padding:
-                0.5rem 0.8rem 1.5rem;
-        }
-
-        .hero h1 {
-            font-size:
-                2.65rem;
-        }
-
-        .hero-description {
-            font-size:
-                12px;
-        }
-
-        .input-shell {
-            padding:
-                14px;
-        }
-
-        .results-title {
-            font-size:
-                24px;
-        }
-
-        .stMarkdown h1 {
-            font-size:
-                26px;
-        }
-
-        .stMarkdown h2 {
-            font-size:
-                22px;
-        }
-
-        .stMarkdown h3 {
-            font-size:
-                19px;
-        }
+    .loading-visual {
+        transform: scale(.72);
     }
 
-    </style>
-    """
-)
+
+    .stTabs [data-baseweb="tab"] {
+        padding: 0 8px !important;
+        font-size: 8px !important;
+    }
+
+    .completed {
+        font-size: 7px;
+    }
+}
+
+</style>
+""")
 
 
 # ============================================================
 # HERO
 # ============================================================
 
-st.html(
-    """
-    <div class="hero">
+st.html("""
+<div class="hero">
 
-        <div class="hero-top">
+    <div class="hero-copy">
 
-            <div class="hero-dot"></div>
-
-            <div class="hero-label">
-                Multi-Agent Intelligence
-            </div>
-
+        <div class="hero-project-name">
+            <span class="research">Research</span><span class="pilot">Pilot</span>
         </div>
 
-        <h1>
-            Research<span class="hero-accent">Pilot</span>
-        </h1>
+        <div class="hero-kicker">
+            AI-POWERED RESEARCH
+        </div>
+
+        <div class="hero-title">
+            Explore.<br>
+            Understand.<br>
+            <span class="gradient">Go Deeper.</span>
+        </div>
 
         <div class="hero-description">
-            Research complex topics through a coordinated
-            pipeline of specialized AI agents — from web
-            discovery to final quality review.
+            A multi-agent research system that searches,
+            reads, synthesizes and critically reviews
+            information to produce a structured report.
         </div>
 
     </div>
 
-    <div class="top-line"></div>
-    """
-)
 
+    <div class="orbit-area">
 
-# ============================================================
-# MAIN LAYOUT
-# ============================================================
+        <div class="orbit"></div>
 
-input_col, pipeline_col = st.columns(
-    [1.05, 0.95],
-    gap="large",
-)
+        <div class="orbit orbit-2"></div>
+
+        <div class="orbit orbit-3"></div>
+
+        <div class="orbit orbit-4"></div>
+
+        <div class="orbit-diagonal"></div>
+
+        <div class="core"></div>
+
+        <div class="planet planet-1"></div>
+
+        <div class="planet planet-2"></div>
+
+        <div class="planet planet-3"></div>
+
+        <div class="planet planet-4"></div>
+
+    </div>
+
+</div>
+""")
 
 
 # ============================================================
 # RESEARCH WORKSPACE
 # ============================================================
 
-with input_col:
+with st.container(key="workspace"):
 
-    st.html(
-        """
-        <div class="workspace-title">
-            Research Workspace
-        </div>
+    st.html("""
+    <div class="workspace-title">
+        <span class="workspace-icon">✣</span>
+        What do you want to research?
+    </div>
+    """)
 
-        <div class="input-shell">
-        """
+    input_col, button_col = st.columns(
+        [5, 1.05],
+        gap="medium"
     )
 
 
@@ -1474,252 +1791,179 @@ with input_col:
     # TOPIC INPUT
     # --------------------------------------------------------
 
-    topic = st.text_input(
-        "Research Topic",
-        value=st.session_state.topic,
-        placeholder="Enter a topic you want to investigate...",
-        label_visibility="visible",
-        disabled=st.session_state.researching,
-    )
+    with input_col:
 
-    st.session_state.topic = topic
-
-
-    # --------------------------------------------------------
-    # RESEARCH BUTTON
-    # --------------------------------------------------------
-
-    if st.session_state.researching:
-
-        st.html(
-            '<div class="researching-button">'
+        topic = st.text_input(
+            "Research Topic",
+            value=st.session_state.topic,
+            placeholder=(
+                "e.g. How will AI agents transform "
+                "software development?"
+            ),
+            label_visibility="collapsed",
+            disabled=st.session_state.researching
         )
 
-        st.button(
-            "Researching...",
+        st.session_state.topic = topic
+
+
+    # --------------------------------------------------------
+    # INVESTIGATE BUTTON
+    # --------------------------------------------------------
+
+    with button_col:
+
+        st.html('<div class="start-button">')
+
+        start = st.button(
+            "Investigate →",
             use_container_width=True,
-            disabled=True,
-            key="researching_button",
+            disabled=st.session_state.researching,
+            key="investigate_button"
         )
 
-        st.html(
-            "</div>"
-        )
-
-        run = False
-
-    else:
-
-        st.html(
-            '<div class="research-button">'
-        )
-
-        run = st.button(
-            "Start Research  →",
-            type="primary",
-            use_container_width=True,
-            key="start_research",
-        )
-
-        st.html(
-            "</div>"
-        )
-
-
-    st.html(
-        """
-        </div>
-
-        <div class="examples-label">
-            SUGGESTED TOPICS
-        </div>
-        """
-    )
-
-
-    # --------------------------------------------------------
-    # SUGGESTED TOPICS
-    # --------------------------------------------------------
-
-    ex1, ex2, ex3 = st.columns(3)
-
-    examples = [
-        "AI agents in 2026",
-        "Quantum computing",
-        "Fusion energy",
-    ]
-
-
-    for col, example, index in zip(
-        [ex1, ex2, ex3],
-        examples,
-        range(3),
-    ):
-
-        with col:
-
-            st.html(
-                '<div class="example-btn">'
-            )
-
-            clicked = st.button(
-                example,
-                key=f"example_{index}",
-                use_container_width=True,
-                disabled=st.session_state.researching,
-            )
-
-            st.html(
-                "</div>"
-            )
-
-
-            if clicked:
-
-                st.session_state.topic = example
-
-                st.rerun()
+        st.html("</div>")
 
 
 # ============================================================
-# AGENT PIPELINE
+# PIPELINE
 # ============================================================
 
-with pipeline_col:
+st.html("""
+<div class="pipeline-section">
 
-    st.html(
-        """
-        <div class="pipeline">
+    <div class="pipeline-heading">
 
-            <div class="pipeline-heading">
+        <div class="pipeline-heading-left">
 
-                <div class="pipeline-title">
-                    Agent Pipeline
-                </div>
-
-                <div class="pipeline-count">
-                    04 AGENTS
-                </div>
-
+            <div class="pipeline-spark">
+                ✣
             </div>
 
-
-            <div class="agent">
-
-                <div class="agent-header">
-
-                    <div class="agent-number">
-                        01
-                    </div>
-
-                    <div class="agent-name">
-                        Search Agent
-                    </div>
-
-                    <div class="agent-status">
-                        READY
-                    </div>
-
-                </div>
-
-                <div class="agent-description">
-                    Discovers recent and reliable web sources.
-                </div>
-
-            </div>
-
-
-            <div class="agent">
-
-                <div class="agent-header">
-
-                    <div class="agent-number">
-                        02
-                    </div>
-
-                    <div class="agent-name">
-                        Reader Agent
-                    </div>
-
-                    <div class="agent-status">
-                        READY
-                    </div>
-
-                </div>
-
-                <div class="agent-description">
-                    Selects and extracts deeper source content.
-                </div>
-
-            </div>
-
-
-            <div class="agent">
-
-                <div class="agent-header">
-
-                    <div class="agent-number">
-                        03
-                    </div>
-
-                    <div class="agent-name">
-                        Writer Chain
-                    </div>
-
-                    <div class="agent-status">
-                        READY
-                    </div>
-
-                </div>
-
-                <div class="agent-description">
-                    Converts research into a structured report.
-                </div>
-
-            </div>
-
-
-            <div class="agent">
-
-                <div class="agent-header">
-
-                    <div class="agent-number">
-                        04
-                    </div>
-
-                    <div class="agent-name">
-                        Critic Chain
-                    </div>
-
-                    <div class="agent-status">
-                        READY
-                    </div>
-
-                </div>
-
-                <div class="agent-description">
-                    Reviews the report for quality and accuracy.
-                </div>
-
+            <div class="pipeline-title">
+                Research Pipeline
             </div>
 
         </div>
-        """
-    )
+
+        <div class="pipeline-count">
+            4 STAGES
+        </div>
+
+    </div>
+
+
+    <div class="pipeline-subtitle">
+        Four specialized agents working together
+    </div>
+
+
+    <div class="pipeline-grid">
+
+
+        <div class="pipeline-card">
+
+            <div class="pipeline-icon">
+                ⌕
+            </div>
+
+            <div class="pipeline-number">
+                01
+            </div>
+
+            <div class="pipeline-name">
+                Search Agent
+            </div>
+
+            <div class="pipeline-description">
+                Finds recent and reliable sources from the web.
+            </div>
+
+        </div>
+
+
+        <div class="pipeline-card">
+
+            <div class="pipeline-icon">
+                ▣
+            </div>
+
+            <div class="pipeline-number">
+                02
+            </div>
+
+            <div class="pipeline-name">
+                Reader Agent
+            </div>
+
+            <div class="pipeline-description">
+                Selects the most relevant resource and
+                extracts deeper content.
+            </div>
+
+        </div>
+
+
+        <div class="pipeline-card">
+
+            <div class="pipeline-icon">
+                ✎
+            </div>
+
+            <div class="pipeline-number">
+                03
+            </div>
+
+            <div class="pipeline-name">
+                Writer Chain
+            </div>
+
+            <div class="pipeline-description">
+                Synthesizes the research into a structured report.
+            </div>
+
+        </div>
+
+
+        <div class="pipeline-card">
+
+            <div class="pipeline-icon">
+                ♢
+            </div>
+
+            <div class="pipeline-number">
+                04
+            </div>
+
+            <div class="pipeline-name">
+                Critic Chain
+            </div>
+
+            <div class="pipeline-description">
+                Reviews the report and provides critical feedback.
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+""")
 
 
 # ============================================================
 # START RESEARCH
 # ============================================================
 
-if run:
+if start:
 
     current_topic = st.session_state.topic.strip()
 
     if not current_topic:
 
         st.warning(
-            "Please enter a research topic before starting."
+            "Enter a research topic to begin."
         )
 
     else:
@@ -1728,68 +1972,260 @@ if run:
 
         st.session_state.researching = True
 
+        st.session_state.scroll_to_progress = True
+
         st.rerun()
 
 
 # ============================================================
-# RUN PIPELINE
+# RESEARCH IN PROGRESS
 # ============================================================
 
 if st.session_state.researching:
 
-    current_topic = st.session_state.topic.strip()
+    safe_topic = html.escape(
+        st.session_state.topic.strip()
+    )
+
+
+    # --------------------------------------------------------
+    # LOADING UI
+    # --------------------------------------------------------
+
+    st.html(
+        f"""
+<div
+    id="research-progress"
+    class="progress-anchor loading-card"
+>
+
+    <div class="loading-layout">
+
+
+        <div class="loading-visual">
+
+            <div class="loading-ring"></div>
+
+            <div class="loading-ring two"></div>
+
+            <div class="loading-ring three"></div>
+
+            <div class="loading-core"></div>
+
+            <div class="loading-dot one"></div>
+
+            <div class="loading-dot two"></div>
+
+            <div class="loading-dot three"></div>
+
+        </div>
+
+
+        <div>
+
+            <div class="loading-title">
+
+                <span class="loading-title-icon">
+                    ✦
+                </span>
+
+                Research in Progress
+
+            </div>
+
+
+            <div class="loading-topic">
+                Investigating: {safe_topic}
+            </div>
+
+
+            <div class="loading-steps">
+
+
+                <div class="loading-step active">
+
+                    <div class="loading-step-dot">
+                        ✓
+                    </div>
+
+                    Searching recent and reliable sources
+
+                </div>
+
+
+                <div class="loading-step active">
+
+                    <div class="loading-step-dot">
+                        ✓
+                    </div>
+
+                    Reading and extracting useful information
+
+                </div>
+
+
+                <div class="loading-step active">
+
+                    <div class="loading-step-dot">
+                        ◌
+                    </div>
+
+                    Synthesizing the research report
+
+                </div>
+
+
+                <div class="loading-step active">
+
+                    <div class="loading-step-dot">
+                        ◌
+                    </div>
+
+                    Critically reviewing the final report
+
+                </div>
+
+
+            </div>
+
+
+            <div class="progress">
+
+                <div class="progress-bar"></div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+"""
+    )
+
+
+    # ========================================================
+    # SMOOTH SCROLL TO RESEARCH PROGRESS
+    # ========================================================
+
+    if st.session_state.scroll_to_progress:
+
+        components.html(
+            """
+<script>
+
+(function () {
+
+    let attempts = 0;
+
+    const timer = setInterval(function () {
+
+        attempts++;
+
+        try {
+
+            const doc =
+                window.parent.document;
+
+            const target =
+                doc.getElementById(
+                    "research-progress"
+                );
+
+            if (target) {
+
+                target.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+                clearInterval(timer);
+            }
+
+        } catch (error) {
+            console.log(error);
+        }
+
+        if (attempts >= 25) {
+            clearInterval(timer);
+        }
+
+    }, 120);
+
+})();
+
+</script>
+""",
+            height=0
+        )
+
+        st.session_state.scroll_to_progress = False
+
+
+    # ========================================================
+    # RUN EXISTING PIPELINE
+    # ========================================================
 
     try:
 
         result = run_research_pipeline(
-            current_topic
+            st.session_state.topic.strip()
         )
 
         st.session_state.result = result
 
-        if current_topic not in st.session_state.history:
-
-            st.session_state.history.append(
-                current_topic
-            )
-
         st.session_state.researching = False
 
         st.rerun()
+
 
     except Exception as error:
 
         st.session_state.researching = False
 
         st.error(
-            "The research pipeline failed."
+            "The research pipeline encountered an error."
         )
 
-        with st.expander(
-            "Technical details"
-        ):
+        with st.expander("Technical details"):
 
             st.exception(error)
 
 
 # ============================================================
-# GENERATED RESULTS
+# RESULTS
 # ============================================================
 
 if st.session_state.result:
 
     result = st.session_state.result
 
+    current_topic = st.session_state.topic.strip()
 
-    # --------------------------------------------------------
-    # RESULT HEADER
-    # --------------------------------------------------------
+    safe_topic = html.escape(
+        current_topic
+    )
+
+
+    # ========================================================
+    # RESULTS HEADER
+    # ========================================================
 
     st.html(
         f"""
-        <div
-            id="research-results-anchor"
-            class="results-header">
+<div
+    id="research-results"
+    class="results"
+>
+
+    <div class="results-header">
+
+        <div class="results-left">
+
+            <div class="results-icon">
+                ▤
+            </div>
 
             <div>
 
@@ -1798,87 +2234,80 @@ if st.session_state.result:
                 </div>
 
                 <div class="results-subtitle">
-                    {st.session_state.topic}
+                    Your comprehensive research report
                 </div>
 
             </div>
 
-            <div class="results-tag">
-                COMPLETED
-            </div>
+        </div>
+
+
+        <div class="completed">
+
+            <div class="completed-dot"></div>
+
+            Completed
 
         </div>
-        """
+
+    </div>
+
+</div>
+"""
     )
 
 
-    # --------------------------------------------------------
-    # AUTO SCROLL
-    # --------------------------------------------------------
+    # ========================================================
+    # AUTO SCROLL TO RESULTS
+    # ========================================================
 
     components.html(
         """
-        <script>
+<script>
 
-        function scrollToResults() {
+(function () {
 
-            try {
+    let attempts = 0;
 
-                const parentDocument =
-                    window.parent.document;
+    const timer = setInterval(function () {
 
-                const target =
-                    parentDocument.getElementById(
-                        "research-results-anchor"
-                    );
+        attempts++;
 
-                if (target) {
+        try {
 
-                    target.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start"
-                    });
+            const doc =
+                window.parent.document;
 
-                    return true;
-                }
-
-            } catch (error) {
-
-                console.log(
-                    "Scroll error:",
-                    error
+            const target =
+                doc.getElementById(
+                    "research-results"
                 );
 
+            if (target) {
+
+                target.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+                clearInterval(timer);
             }
 
-            return false;
+        } catch (error) {
+            console.log(error);
         }
 
+        if (attempts >= 25) {
+            clearInterval(timer);
+        }
 
-        let attempts = 0;
+    }, 120);
 
-        const interval =
-            setInterval(function () {
+})();
 
-                attempts++;
-
-                const success =
-                    scrollToResults();
-
-                if (
-                    success ||
-                    attempts >= 10
-                ) {
-
-                    clearInterval(interval);
-
-                }
-
-            }, 200);
-
-        </script>
-        """,
-        height=0,
+</script>
+""",
+        height=0
     )
 
 
@@ -1886,12 +2315,12 @@ if st.session_state.result:
     # RESULT TABS
     # ========================================================
 
-    report_tab, sources_tab, analysis_tab, review_tab = st.tabs(
+    report_tab, sources_tab, read_tab, critic_tab = st.tabs(
         [
             "Report",
             "Sources",
-            "Analysis",
-            "Review",
+            "Deep Read",
+            "Critic Review"
         ]
     )
 
@@ -1904,41 +2333,164 @@ if st.session_state.result:
 
         report = result.get(
             "report",
-            "No report was generated.",
+            "No report was generated."
         )
 
         if hasattr(report, "content"):
-
             report = report.content
 
         report = str(report)
 
 
         st.html(
-            """
-            <div class="report-box">
+            f"""
+<div class="report-card">
 
-                <div class="report-label">
-                    Final Research Report
+    <div class="report-grid">
+
+        <div>
+
+            <div class="report-heading">
+
+                <div class="report-icon">
+                    ▤
+                </div>
+
+                <div>
+
+                    <div class="report-name">
+                        Research Report
+                    </div>
+
+                    <div class="report-topic">
+                        {safe_topic}
+                    </div>
+
                 </div>
 
             </div>
-            """
-        )
 
+
+            <div class="report-body">
+"""
+        )
 
         st.markdown(report)
 
+        st.html("""
+            </div>
 
-        st.write("")
+        </div>
 
+
+        <div class="glance">
+
+            <div class="glance-title">
+                At a Glance
+            </div>
+
+
+            <div class="metric">
+
+                <div class="metric-icon">
+                    ◈
+                </div>
+
+                <div>
+
+                    <div class="metric-value">
+                        Multi-Agent
+                    </div>
+
+                    <div class="metric-label">
+                        Research system
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="metric">
+
+                <div class="metric-icon">
+                    ⌕
+                </div>
+
+                <div>
+
+                    <div class="metric-value">
+                        Web Search
+                    </div>
+
+                    <div class="metric-label">
+                        Source discovery
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="metric">
+
+                <div class="metric-icon">
+                    ✎
+                </div>
+
+                <div>
+
+                    <div class="metric-value">
+                        Synthesis
+                    </div>
+
+                    <div class="metric-label">
+                        Report generation
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="metric">
+
+                <div class="metric-icon">
+                    ✓
+                </div>
+
+                <div>
+
+                    <div class="metric-value">
+                        Reviewed
+                    </div>
+
+                    <div class="metric-label">
+                        Critic stage
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+""")
+
+
+        st.html('<div class="download-area">')
 
         st.download_button(
-            label="Download Report",
+            "↓  Download Report",
             data=report,
-            file_name="researchpilot_report.md",
-            mime="text/markdown",
+            file_name="research_report.md",
+            mime="text/markdown"
         )
+
+        st.html("</div>")
 
 
     # ========================================================
@@ -1949,108 +2501,208 @@ if st.session_state.result:
 
         sources = result.get(
             "search_results",
-            "No search results available.",
+            "No search results were returned."
         )
 
         if hasattr(sources, "content"):
-
             sources = sources.content
 
+        st.html("""
+<div class="report-card">
 
-        st.html(
-            """
-            <div class="report-box">
+    <div class="report-heading">
 
-                <div class="report-label">
-                    Research Sources
-                </div>
+        <div class="report-icon">
+            ⌕
+        </div>
 
+        <div>
+
+            <div class="report-name">
+                Research Sources
             </div>
-            """
-        )
 
+            <div class="report-topic">
+                Sources discovered by Search Agent
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="report-body">
+
+""")
 
         st.markdown(
             str(sources)
         )
 
+        st.html("""
+    </div>
+
+</div>
+""")
+
 
     # ========================================================
-    # ANALYSIS
+    # DEEP READ
     # ========================================================
 
-    with analysis_tab:
+    with read_tab:
 
         scraped = result.get(
             "scraped_content",
-            "No scraped content available.",
+            "No scraped content was returned."
         )
 
         if hasattr(scraped, "content"):
-
             scraped = scraped.content
 
+        st.html("""
+<div class="report-card">
 
-        st.html(
-            """
-            <div class="report-box">
+    <div class="report-heading">
 
-                <div class="report-label">
-                    Deep Source Analysis
-                </div>
+        <div class="report-icon">
+            ▣
+        </div>
 
+        <div>
+
+            <div class="report-name">
+                Deep Reading
             </div>
-            """
-        )
 
+            <div class="report-topic">
+                Content extracted by Reader Agent
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="report-body">
+
+""")
 
         st.markdown(
             str(scraped)
         )
 
+        st.html("""
+    </div>
+
+</div>
+""")
+
 
     # ========================================================
-    # REVIEW
+    # CRITIC REVIEW
     # ========================================================
 
-    with review_tab:
+    with critic_tab:
 
         feedback = result.get(
             "feedback",
-            "No critic feedback available.",
+            "No critic feedback was returned."
         )
 
         if hasattr(feedback, "content"):
-
             feedback = feedback.content
 
+        st.html("""
+<div class="critic-card">
 
-        st.html(
-            """
-            <div class="review-box">
+    <div class="critic-main">
 
-                <div class="review-label">
-                    Critic Review
-                </div>
+        <div class="critic-icon">
+            ♢
+        </div>
 
+        <div>
+
+            <div class="critic-title">
+                Critic Review
             </div>
-            """
-        )
 
+            <div class="critic-description">
+
+""")
 
         st.markdown(
             str(feedback)
         )
+
+        st.html("""
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="review-score">
+
+        <div class="review-label">
+            REVIEW STATUS
+        </div>
+
+        <div class="review-value">
+            ✓
+        </div>
+
+    </div>
+
+</div>
+""")
+
+
+    # ========================================================
+    # NEW RESEARCH
+    # ========================================================
+
+    st.html('<div class="new-research">')
+
+    if st.button(
+        "＋  Start New Research",
+        use_container_width=True
+    ):
+
+        st.session_state.topic = ""
+        st.session_state.result = None
+        st.session_state.researching = False
+
+        st.rerun()
+
+    st.html("</div>")
 
 
 # ============================================================
 # FOOTER
 # ============================================================
 
-st.html(
-    """
-    <div class="footer">
-        RESEARCHPILOT · MULTI-AGENT RESEARCH SYSTEM · STREAMLIT
+st.html("""
+<div class="footer">
+
+    <div>
+
+        <span style="color:#8994a7;">
+            ✦ ResearchPilot
+        </span>
+
+        &nbsp; · &nbsp;
+
+        Multi-Agent Research
+
     </div>
-    """
-)
+
+
+    <div>
+        Search · Read · Write · Critique
+    </div>
+
+</div>
+""")

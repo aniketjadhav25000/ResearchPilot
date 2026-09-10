@@ -11,9 +11,10 @@ langgraph
 # ==============================
 # LLM Providers
 # ==============================
-
+langchain-google-genai
 openai
 mistralai
+langchain-groq
 
 # ==============================
 # Search & Web Scraping

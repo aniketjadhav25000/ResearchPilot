@@ -7,16 +7,13 @@ import os
 
 from tavily import TavilyClient
 from langchain.tools import tool
-from rich import print
 
 tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 
+
 @tool
 def web_search(query: str) -> str:
-    """
-    Search the web for recent and reliable information.
-    Return search results including title, URL, and content.
-    """
+    """Search the web for recent and reliable information."""
 
     results = tavily.search(
         query=query,
@@ -28,60 +25,63 @@ def web_search(query: str) -> str:
     for i, r in enumerate(results["results"], 1):
         out.append(
             f"""
-            RESULT {i}
-            TITLE: {r["title"]}
-            URL: {r["url"]}
-            CONTENT: {r["content"][:500]}
-            """
+RESULT {i}
+TITLE: {r["title"]}
+URL: {r["url"]}
+CONTENT: {r["content"][:500]}
+"""
         )
 
     return "\n--------------------\n".join(out)
 
+
 @tool
 def scrape_url(url: str) -> str:
-    """Scrape and return clean text content from a given URL for deeper reading."""
+    """Scrape clean structured content from a URL."""
+
     try:
         resp = requests.get(
             url,
             timeout=15,
-            headers={
-                "User-Agent": (
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) "
-                    "Chrome/131.0.0.0 Safari/537.36"
-                ),
-                "Accept": "text/html,application/xhtml+xml",
-                "Accept-Language": "en-US,en;q=0.9",
-            },
+            headers={"User-Agent": "Mozilla/5.0"}
         )
 
         resp.raise_for_status()
 
-        if resp.apparent_encoding:
-            resp.encoding = resp.apparent_encoding
-
         soup = BeautifulSoup(resp.text, "html.parser")
 
         for tag in soup([
-            "script",
-            "style",
-            "nav",
-            "footer",
-            "header",
-            "aside",
-            "noscript"
+            "script", "style", "nav", "footer",
+            "header", "aside", "noscript",
+            "svg", "iframe", "form"
         ]):
             tag.decompose()
 
-        text = soup.get_text(separator=" ", strip=True)
+        content = []
 
-        return text[:5000]
+        for tag in soup.find_all([
+            "h1", "h2", "h3", "p", "li", "pre"
+        ]):
+            text = tag.get_text(" ", strip=True)
 
-    except requests.exceptions.HTTPError as e:
-        return f"Could not scrape URL. HTTP error: {e}"
+            if not text:
+                continue
 
-    except requests.exceptions.RequestException as e:
-        return f"Could not scrape URL. Request error: {e}"
+            if tag.name == "h1":
+                content.append(f"# {text}")
+            elif tag.name == "h2":
+                content.append(f"## {text}")
+            elif tag.name == "h3":
+                content.append(f"### {text}")
+            elif tag.name == "li":
+                content.append(f"- {text}")
+            elif tag.name == "pre":
+                content.append(f"```text\n{text}\n```")
+            else:
+                content.append(text)
+
+        return "\n\n".join(content)[:10000]
 
     except Exception as e:
         return f"Could not scrape URL: {e}"
+
